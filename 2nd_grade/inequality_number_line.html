@@ -118,6 +118,8 @@
           <div>
             <label for="opType">연산</label>
             <select id="opType">
+              <option value="add">더하기</option>
+              <option value="sub">빼기</option>
               <option value="mul">곱하기</option>
               <option value="div">나누기</option>
             </select>
@@ -198,7 +200,12 @@
       return Number.isInteger(n) ? String(n) : String(Number(n.toFixed(2)));
     }
 
-    function opSymbol(type) { return type === 'mul' ? '×' : '÷'; }
+    function opSymbol(type) {
+      if (type === 'add') return '+';
+      if (type === 'sub') return '-';
+      if (type === 'mul') return '×';
+      return '÷';
+    }
 
     function flipRelation(rel) {
       const map = { '<': '>', '>': '<', '≤': '≥', '≥': '≤', '=': '=' };
@@ -206,6 +213,9 @@
     }
 
     function transformRelation(rel, opType, opValue) {
+      if (opType === 'add' || opType === 'sub') {
+        return rel;
+      }
       if (opType === 'mul') {
         if (opValue < 0) return flipRelation(rel);
         if (opValue === 0) return '=';
@@ -261,7 +271,13 @@
       state.inputShown = true;
 
       let newLeft, newRight;
-      if (v.opType === 'mul') {
+      if (v.opType === 'add') {
+        newLeft = v.left + v.opValue;
+        newRight = v.right + v.opValue;
+      } else if (v.opType === 'sub') {
+        newLeft = v.left - v.opValue;
+        newRight = v.right - v.opValue;
+      } else if (v.opType === 'mul') {
         newLeft = v.left * v.opValue;
         newRight = v.right * v.opValue;
       } else {
@@ -284,7 +300,11 @@
       exprBottomEl.textContent =
         `${formatNum(t.left)} ${sym} ${opv}, ${formatNum(t.right)} ${sym} ${opv} → ${formatNum(b.left)} ${b.relation} ${formatNum(b.right)}`;
 
-      if (state.opType === 'mul' && state.opValue > 0) {
+      if (state.opType === 'add') {
+        hintTextEl.textContent = '같은 수를 양변에 더했으므로 부등호 방향은 그대로입니다.';
+      } else if (state.opType === 'sub') {
+        hintTextEl.textContent = '같은 수를 양변에서 뺐으므로 부등호 방향은 그대로입니다.';
+      } else if (state.opType === 'mul' && state.opValue > 0) {
         hintTextEl.textContent = '양수를 곱했으므로 부등호 방향은 그대로입니다.';
       } else if (state.opType === 'div' && state.opValue > 0) {
         hintTextEl.textContent = '양수로 나눴으므로 부등호 방향은 그대로입니다.';
@@ -543,7 +563,7 @@
       ctx.font = '15px sans-serif';
       ctx.textAlign = 'center';
       if (state.inputShown) ctx.fillText('입력한 대소관계', cssW/2, 92);
-      if (state.animating || state.resultShown) ctx.fillText('같은 수를 곱하거나 나눈 뒤', cssW/2, state.topY + 98);
+      if (state.animating || state.resultShown) ctx.fillText('같은 수를 연산한 뒤', cssW/2, state.topY + 98);
       ctx.restore();
     }
 
