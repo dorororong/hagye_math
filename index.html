@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>하계 수학 허브 | Hagye Math</title>
-  <meta name="description" content="2nd_grade 폴더의 웹앱 페이지를 자동으로 연결하는 허브" />
+  <title>부등식의 성질</title>
+  <meta name="description" content="2nd_grade 웹앱 목록 허브" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -58,10 +58,11 @@
       padding: 28px 20px 56px;
     }
 
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .title {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
       padding: 14px 16px;
       border-radius: 16px;
       background: var(--surface);
@@ -71,18 +72,6 @@
       animation: riseIn 600ms ease both;
     }
 
-    .brand {
-      font-family: "Space Grotesk", sans-serif;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .tag {
-      font-size: 0.9rem;
-      color: var(--ink-soft);
-    }
-
     main {
       margin-top: 30px;
       display: grid;
@@ -90,7 +79,6 @@
       grid-template-columns: repeat(12, minmax(0, 1fr));
     }
 
-    .hero,
     .card {
       border-radius: 24px;
       border: 1px solid var(--ring);
@@ -100,76 +88,6 @@
       transform: translateY(18px);
       opacity: 0;
       animation: riseIn 700ms ease forwards;
-    }
-
-    .hero {
-      grid-column: span 12;
-      padding: 34px;
-      animation-delay: 120ms;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero::after {
-      content: "";
-      position: absolute;
-      width: 240px;
-      height: 240px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, rgba(239, 111, 53, 0.33), rgba(31, 143, 122, 0.26));
-      top: -70px;
-      right: -70px;
-      filter: blur(1px);
-    }
-
-    h1 {
-      font-family: "Space Grotesk", sans-serif;
-      font-size: clamp(2rem, 4.2vw, 3.8rem);
-      line-height: 1.06;
-      max-width: 15ch;
-      letter-spacing: -0.03em;
-    }
-
-    .lead {
-      margin-top: 14px;
-      color: var(--ink-soft);
-      font-size: clamp(1rem, 2vw, 1.15rem);
-      max-width: 58ch;
-      line-height: 1.65;
-    }
-
-    .cta-row {
-      margin-top: 24px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      padding: 11px 18px;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 700;
-      border: 1px solid transparent;
-      transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
-      will-change: transform;
-      display: inline-block;
-    }
-
-    .btn-primary {
-      background: linear-gradient(130deg, var(--accent), #ff9a50);
-      color: #fff;
-      box-shadow: 0 10px 20px rgba(239, 111, 53, 0.28);
-    }
-
-    .btn-secondary {
-      color: var(--ink);
-      background: rgba(255, 255, 255, 0.74);
-      border-color: var(--ring);
-    }
-
-    .btn:hover {
-      transform: translateY(-2px);
     }
 
     .card {
@@ -208,12 +126,14 @@
     }
 
     .app-item {
-      grid-column: span 4;
-      display: block;
+      grid-column: span 6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       text-decoration: none;
       border: 1px solid var(--ring);
-      border-radius: 16px;
-      padding: 16px;
+      border-radius: 14px;
+      padding: 18px;
       background: rgba(255, 255, 255, 0.88);
       color: var(--ink);
       transition: transform 180ms ease, box-shadow 180ms ease;
@@ -227,16 +147,10 @@
 
     .app-title {
       font-family: "Space Grotesk", sans-serif;
-      font-size: 1.05rem;
+      font-size: 1.15rem;
       font-weight: 700;
-      margin-bottom: 6px;
+      margin-bottom: 0;
       letter-spacing: -0.01em;
-    }
-
-    .app-path {
-      color: var(--ink-soft);
-      font-size: 0.9rem;
-      word-break: break-all;
     }
 
     .empty-state {
@@ -248,25 +162,11 @@
       line-height: 1.6;
     }
 
-    .card:nth-of-type(3) {
-      animation-delay: 310ms;
-    }
-
-    .card:nth-of-type(4) {
-      animation-delay: 390ms;
-    }
-
     .card h2 {
       font-family: "Space Grotesk", sans-serif;
       font-size: 1.25rem;
       margin-bottom: 8px;
       letter-spacing: -0.01em;
-    }
-
-    .card p {
-      color: var(--ink-soft);
-      line-height: 1.6;
-      font-size: 0.98rem;
     }
 
     footer {
@@ -283,16 +183,8 @@
         grid-column: span 6;
       }
 
-      .hero {
-        padding: 28px 22px;
-      }
-
       .wrap {
         padding: 18px 14px 40px;
-      }
-
-      nav {
-        padding: 12px 14px;
       }
     }
 
@@ -317,27 +209,12 @@
 <body>
   <div class="grain"></div>
   <div class="wrap">
-    <nav>
-      <div class="brand">Hagye Math</div>
-      <div class="tag">GitHub Pages</div>
-    </nav>
+    <h1 class="title">부등식의 성질</h1>
 
     <main>
-      <section class="hero">
-        <h1>수학 웹앱 연결 허브</h1>
-        <p class="lead">
-          이 페이지는 <strong>2nd_grade</strong> 폴더에 있는 단일 웹페이지 파일을 자동으로 모아 연결합니다.
-          지금은 1개 페이지가 있으며, 새 HTML 파일을 추가하면 허브 목록에 바로 나타납니다.
-        </p>
-        <div class="cta-row">
-          <a class="btn btn-primary" href="https://github.com/dorororong/hagye_math" target="_blank" rel="noreferrer">저장소 보기</a>
-          <a class="btn btn-secondary" href="#apps">앱 목록 보기</a>
-        </div>
-      </section>
-
       <section class="card apps-card" id="apps">
         <div class="apps-head">
-          <h2>2학년 페이지 목록</h2>
+          <h2>페이지 목록</h2>
           <div class="count-chip" id="appCount">불러오는 중...</div>
         </div>
         <div class="apps-grid" id="appList"></div>
@@ -354,34 +231,38 @@
     const repo = 'hagye_math';
     const branch = 'main';
     const targetFolder = '2nd_grade';
+    const titleMap = {
+      'inequality_number_line': '부등식의 성질',
+      'inequality_number_line.html': '부등식의 성질'
+    };
 
     const appListEl = document.getElementById('appList');
     const appCountEl = document.getElementById('appCount');
 
     function titleFromName(fileName) {
+      if (titleMap[fileName]) return titleMap[fileName];
       const base = fileName.replace(/\.(html?|md)$/i, '');
       return base.replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
     }
 
     function isWebPage(fileName) {
-      return /\.html?$/i.test(fileName) || !fileName.includes('.');
+      return /\.html?$/i.test(fileName);
+    }
+
+    function pageHref(path) {
+      return `./${path}`;
     }
 
     function createAppCard(path, name) {
       const link = document.createElement('a');
       link.className = 'app-item';
-      link.href = `./${path}`;
+      link.href = pageHref(path);
 
       const title = document.createElement('div');
       title.className = 'app-title';
       title.textContent = titleFromName(name);
 
-      const filePath = document.createElement('div');
-      filePath.className = 'app-path';
-      filePath.textContent = path;
-
       link.appendChild(title);
-      link.appendChild(filePath);
       return link;
     }
 
@@ -406,7 +287,7 @@
 
         if (!pages.length) {
           appCountEl.textContent = '0개 페이지';
-          renderEmpty('2nd_grade 폴더에 HTML 파일을 추가하면 이곳에 자동으로 표시됩니다.');
+          renderEmpty('2nd_grade 폴더에 HTML 파일을 추가하면 이곳에 표시됩니다.');
           return;
         }
 

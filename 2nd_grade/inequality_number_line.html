@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>부등식 수직선 시각화</title>
+  <style>
+    :root{
+      --bg:#f6f8fb;
+      --card:#ffffff;
+      --line:#1f2937;
+      --grid:#cbd5e1;
+      --blue:#2b7fff;
+      --pink:#ff4f9a;
+      --text:#111827;
+      --muted:#6b7280;
+      --shadow:0 12px 30px rgba(15,23,42,.08);
+      --radius:18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+      background:linear-gradient(180deg,#f8fbff 0%, #eef4fb 100%);
+      color:var(--text);
+    }
+    .wrap{max-width:1250px;margin:0 auto;padding:24px}
+    h1{margin:0 0 8px;font-size:30px}
+    .sub{color:var(--muted);margin-bottom:22px;line-height:1.5}
+    .grid{display:grid;grid-template-columns:360px 1fr;gap:20px}
+    .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+    .section-title{font-size:18px;font-weight:700;margin:0 0 14px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+    .row-3{display:grid;grid-template-columns:1fr 120px 1fr;gap:10px;margin-bottom:12px;align-items:end}
+    label{display:block;font-size:13px;margin-bottom:6px;color:#374151;font-weight:600}
+    input, select{
+      width:100%;padding:12px 12px;border:1px solid #d1d5db;border-radius:12px;
+      font-size:16px;background:#fff;
+    }
+    input:focus, select:focus{
+      outline:none;border-color:#60a5fa;box-shadow:0 0 0 4px rgba(96,165,250,.16);
+    }
+    button{
+      border:none;background:var(--blue);color:white;padding:12px 16px;border-radius:12px;
+      font-size:16px;font-weight:700;cursor:pointer;transition:transform .15s ease, opacity .15s ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    button.secondary{background:#64748b}
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .status{
+      margin-top:14px;padding:12px 14px;border-radius:14px;background:#f8fafc;
+      border:1px solid #e5e7eb;line-height:1.6;font-size:15px;
+    }
+    .status .expr{font-size:24px;font-weight:800;letter-spacing:.3px}
+    .hint{color:var(--muted);font-size:13px;margin-top:8px;line-height:1.5}
+    .viz-card{padding:16px}
+    .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:14px;color:#374151;margin:6px 0 10px}
+    .dot{width:12px;height:12px;border-radius:999px;display:inline-block;vertical-align:middle;margin-right:6px}
+    .dot.blue{background:var(--blue)}
+    .dot.pink{background:var(--pink)}
+    .canvas-wrap{
+      background:#fcfdff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;
+    }
+    canvas{
+      width:100%;height:520px;display:block;
+      background:
+        linear-gradient(180deg, rgba(43,127,255,0.03), rgba(43,127,255,0.00) 30%),
+        linear-gradient(180deg, rgba(255,79,154,0.03), rgba(255,79,154,0.00) 75%);
+    }
+    .note{margin-top:10px;font-size:14px;color:#475569;line-height:1.6}
+    .pill{
+      display:inline-block;padding:4px 10px;border-radius:999px;background:#eff6ff;
+      color:#1d4ed8;font-size:12px;font-weight:700;margin-left:8px;vertical-align:middle;
+    }
+    .mini{
+      display:inline-block;padding:3px 8px;border-radius:999px;background:#f1f5f9;
+      color:#334155;font-size:12px;font-weight:700;margin-left:6px;
+    }
+    @media (max-width:960px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>부등식 수직선 시각화</h1>
+    <div class="sub">
+      먼저 <strong>숫자입력</strong>을 누르면 첫 번째 수직선 위에 입력한 수와 대소관계가 상자로 표시됩니다.
+      그 다음 <strong>계산하기</strong>를 누르면 화살표가 천천히 아래로 이동하고, 두 번째 수직선에 계산 결과와 부등식이 표시됩니다.
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="section-title">입력</div>
+
+        <div class="row-3">
+          <div>
+            <label for="leftVal">왼쪽 수</label>
+            <input id="leftVal" type="number" step="any" value="2" />
+          </div>
+
+          <div>
+            <label for="relation">비교</label>
+            <select id="relation">
+              <option value="<"><</option>
+              <option value=">">></option>
+              <option value="≤">≤</option>
+              <option value="≥">≥</option>
+              <option value="=">=</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="rightVal">오른쪽 수</label>
+            <input id="rightVal" type="number" step="any" value="4" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="opType">연산</label>
+            <select id="opType">
+              <option value="mul">곱하기</option>
+              <option value="div">나누기</option>
+            </select>
+          </div>
+          <div>
+            <label for="opValue">연산할 수</label>
+            <input id="opValue" type="number" step="any" value="-2" />
+          </div>
+        </div>
+
+        <div class="btns">
+          <button id="inputBtn">숫자입력</button>
+          <button id="calcBtn">계산하기</button>
+          <button class="secondary" id="resetBtn">예시로 되돌리기</button>
+        </div>
+
+        <div class="status">
+          <div><strong>현재 대소관계</strong> <span class="mini">입력 상태</span></div>
+          <div class="expr" id="exprTop">2 &lt; 4</div>
+          <div id="exprBottom">아직 계산 전입니다.</div>
+          <div class="hint" id="hintText">숫자입력을 누르면 첫 수직선 위에 식이 나타납니다.</div>
+        </div>
+      </div>
+
+      <div class="card viz-card">
+        <div class="section-title">시각화 <span class="pill">범위: -10 ~ 10</span></div>
+        <div class="legend">
+          <div><span class="dot blue"></span>위 수직선: 입력한 관계</div>
+          <div><span class="dot pink"></span>아래 수직선: 계산 후 관계</div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="canvas" width="820" height="520"></canvas>
+        </div>
+        <div class="note">
+          위 수직선 위에는 입력한 식이, 아래 수직선 아래에는 계산된 식이 박스로 표시됩니다.
+          화살표는 계산 버튼을 누르면 천천히 내려가며 이동 과정을 보여줍니다.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const leftValEl = document.getElementById('leftVal');
+    const rightValEl = document.getElementById('rightVal');
+    const relationEl = document.getElementById('relation');
+    const opTypeEl = document.getElementById('opType');
+    const opValueEl = document.getElementById('opValue');
+    const inputBtn = document.getElementById('inputBtn');
+    const calcBtn = document.getElementById('calcBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    const exprTopEl = document.getElementById('exprTop');
+    const exprBottomEl = document.getElementById('exprBottom');
+    const hintTextEl = document.getElementById('hintText');
+
+    const state = {
+      min: -10,
+      max: 10,
+      topY: 170,
+      bottomY: 370,
+      leftX: 70,
+      rightX: 760,
+      top: { left: 2, right: 4, relation: '<' },
+      bottom: { left: -4, right: -8, relation: '>' },
+      opType: 'mul',
+      opValue: -2,
+      inputShown: false,
+      resultShown: false,
+      animating: false,
+      progress: 0
+    };
+
+    function formatNum(n) {
+      if (Math.abs(n) < 1e-10) n = 0;
+      return Number.isInteger(n) ? String(n) : String(Number(n.toFixed(2)));
+    }
+
+    function opSymbol(type) { return type === 'mul' ? '×' : '÷'; }
+
+    function flipRelation(rel) {
+      const map = { '<': '>', '>': '<', '≤': '≥', '≥': '≤', '=': '=' };
+      return map[rel] || rel;
+    }
+
+    function transformRelation(rel, opType, opValue) {
+      if (opType === 'mul') {
+        if (opValue < 0) return flipRelation(rel);
+        if (opValue === 0) return '=';
+        return rel;
+      }
+      if (opValue < 0) return flipRelation(rel);
+      return rel;
+    }
+
+    function validateInputs() {
+      const left = parseFloat(leftValEl.value);
+      const right = parseFloat(rightValEl.value);
+      const relation = relationEl.value;
+      const opType = opTypeEl.value;
+      const opValue = parseFloat(opValueEl.value);
+
+      if ([left, right, opValue].some(Number.isNaN)) {
+        alert('숫자를 정확히 입력해 주세요.');
+        return null;
+      }
+      if (opType === 'div' && opValue === 0) {
+        alert('0으로 나눌 수 없습니다.');
+        return null;
+      }
+      return { left, right, relation, opType, opValue };
+    }
+
+    function applyInput() {
+      const v = validateInputs();
+      if (!v) return;
+
+      state.top = { left: v.left, right: v.right, relation: v.relation };
+      state.opType = v.opType;
+      state.opValue = v.opValue;
+      state.inputShown = true;
+      state.resultShown = false;
+      state.animating = false;
+      state.progress = 0;
+
+      exprTopEl.textContent = `${formatNum(v.left)} ${v.relation} ${formatNum(v.right)}`;
+      exprBottomEl.textContent = '아직 계산 전입니다.';
+      hintTextEl.textContent = '이제 계산하기를 누르면 화살표가 천천히 내려가고 아래 수직선에 결과가 표시됩니다.';
+      drawScene();
+    }
+
+    function computeResult() {
+      const v = validateInputs();
+      if (!v) return;
+
+      state.top = { left: v.left, right: v.right, relation: v.relation };
+      state.opType = v.opType;
+      state.opValue = v.opValue;
+      state.inputShown = true;
+
+      let newLeft, newRight;
+      if (v.opType === 'mul') {
+        newLeft = v.left * v.opValue;
+        newRight = v.right * v.opValue;
+      } else {
+        newLeft = v.left / v.opValue;
+        newRight = v.right / v.opValue;
+      }
+      const newRelation = transformRelation(v.relation, v.opType, v.opValue);
+      state.bottom = { left: newLeft, right: newRight, relation: newRelation };
+      updateStatusTexts();
+      startAnimation();
+    }
+
+    function updateStatusTexts() {
+      const t = state.top;
+      const b = state.bottom;
+      const sym = opSymbol(state.opType);
+      const opv = formatNum(state.opValue);
+
+      exprTopEl.textContent = `${formatNum(t.left)} ${t.relation} ${formatNum(t.right)}`;
+      exprBottomEl.textContent =
+        `${formatNum(t.left)} ${sym} ${opv}, ${formatNum(t.right)} ${sym} ${opv} → ${formatNum(b.left)} ${b.relation} ${formatNum(b.right)}`;
+
+      if (state.opType === 'mul' && state.opValue > 0) {
+        hintTextEl.textContent = '양수를 곱했으므로 부등호 방향은 그대로입니다.';
+      } else if (state.opType === 'div' && state.opValue > 0) {
+        hintTextEl.textContent = '양수로 나눴으므로 부등호 방향은 그대로입니다.';
+      } else if (state.opType === 'mul' && state.opValue < 0) {
+        hintTextEl.textContent = '음수를 곱했으므로 부등호 방향이 반대로 바뀝니다.';
+      } else if (state.opType === 'div' && state.opValue < 0) {
+        hintTextEl.textContent = '음수로 나눴으므로 부등호 방향이 반대로 바뀝니다.';
+      } else if (state.opType === 'mul' && state.opValue === 0) {
+        hintTextEl.textContent = '0을 곱하면 두 값이 모두 0이 됩니다.';
+      } else {
+        hintTextEl.textContent = '계산 결과를 확인해 보세요.';
+      }
+    }
+
+    function xForValue(v) {
+      const clamped = Math.max(state.min, Math.min(state.max, v));
+      const t = (clamped - state.min) / (state.max - state.min);
+      return state.leftX + t * (state.rightX - state.leftX);
+    }
+
+    function drawNumberLine(y, label, color) {
+      ctx.save();
+      ctx.lineWidth = 2.4;
+      ctx.strokeStyle = '#111827';
+      ctx.beginPath();
+      ctx.moveTo(state.leftX - 12, y);
+      ctx.lineTo(state.rightX + 12, y);
+      ctx.stroke();
+      drawArrowHead(state.rightX + 12, y, 1, 0, '#111827', 10);
+
+      for (let i = state.min; i <= state.max; i++) {
+        const x = xForValue(i);
+        ctx.beginPath();
+        ctx.moveTo(x, y - 10);
+        ctx.lineTo(x, y + 10);
+        ctx.lineWidth = i === 0 ? 2.4 : 1.3;
+        ctx.strokeStyle = i === 0 ? '#334155' : '#94a3b8';
+        ctx.stroke();
+
+        ctx.fillStyle = '#334155';
+        ctx.font = '14px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(String(i), x, y - 16);
+      }
+
+      ctx.fillStyle = color;
+      ctx.font = 'bold 17px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, state.leftX - 24, y - 34);
+      ctx.restore();
+    }
+
+    function drawPoint(x, y, color) {
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(x, y, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawNumberNearPoint(x, y, color, text, pos='down', opacity=1) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = color;
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(text, x, pos === 'down' ? y + 30 : y - 18);
+      ctx.restore();
+    }
+
+    function drawRelationSymbol(x1, x2, y, rel, color, pos='above', opacity=1) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = color;
+      ctx.font = 'bold 34px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(rel, (x1 + x2) / 2, pos === 'above' ? y - 22 : y + 52);
+      ctx.restore();
+    }
+
+    function drawDashedGuide(x1, y1, x2, y2, color, opacity=1) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.setLineDash([7,6]);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function quadBezier(p0, p1, p2, t) {
+      const x = (1-t)*(1-t)*p0.x + 2*(1-t)*t*p1.x + t*t*p2.x;
+      const y = (1-t)*(1-t)*p0.y + 2*(1-t)*t*p1.y + t*t*p2.y;
+      return {x, y};
+    }
+
+    function drawAnimatedArrow(x1, y1, x2, y2, color, progress, bend) {
+      const mx = (x1 + x2) / 2;
+      const my = (y1 + y2) / 2 + bend;
+      const p0 = {x:x1, y:y1};
+      const p1 = {x:mx, y:my};
+      const p2 = {x:x2, y:y2};
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 4;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+
+      const steps = 90;
+      const maxI = Math.floor(steps * progress);
+      for (let i = 0; i <= maxI; i++) {
+        const t = i / steps;
+        const pt = quadBezier(p0, p1, p2, t);
+        if (i === 0) ctx.moveTo(pt.x, pt.y);
+        else ctx.lineTo(pt.x, pt.y);
+      }
+      ctx.stroke();
+
+      if (progress > 0.985) {
+        const end = quadBezier(p0, p1, p2, 1);
+        const prev = quadBezier(p0, p1, p2, 0.96);
+        const dx = end.x - prev.x;
+        const dy = end.y - prev.y;
+        const len = Math.hypot(dx, dy) || 1;
+        drawArrowHead(end.x, end.y, dx/len, dy/len, color, 12);
+      }
+      ctx.restore();
+    }
+
+    function drawArrowHead(x, y, ux, uy, color, size) {
+      const px = -uy;
+      const py = ux;
+      ctx.save();
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x - ux*size - px*size*0.55, y - uy*size - py*size*0.55);
+      ctx.lineTo(x - ux*size + px*size*0.55, y - uy*size + py*size*0.55);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
+    function drawLabelBox(text, centerX, y, fill, stroke, textColor, opacity=1) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.font = 'bold 24px sans-serif';
+      const padX = 18, h = 46;
+      const w = Math.max(120, ctx.measureText(text).width + padX * 2);
+      const x = centerX - w / 2;
+      roundRect(x, y, w, h, 14);
+      ctx.fillStyle = fill;
+      ctx.fill();
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      ctx.fillStyle = textColor;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, centerX, y + h/2 + 1);
+      ctx.restore();
+    }
+
+    function drawClampMark(value, y, color, side='left', opacity=1) {
+      ctx.save();
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = color;
+      ctx.font = 'bold 13px sans-serif';
+      ctx.textAlign = side === 'left' ? 'left' : 'right';
+      const x = side === 'left' ? state.leftX + 5 : state.rightX - 5;
+      ctx.fillText('범위 밖', x, y + 48);
+      ctx.restore();
+    }
+
+
+    function drawScene() {
+      const ratio = window.devicePixelRatio || 1;
+      const cssW = Math.max(300, Math.floor(canvas.clientWidth || 820));
+      const cssH = Math.max(300, Math.floor(canvas.clientHeight || 520));
+
+      canvas.width = Math.floor(cssW * ratio);
+      canvas.height = Math.floor(cssH * ratio);
+
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(ratio, ratio);
+      ctx.clearRect(0, 0, cssW, cssH);
+
+      state.leftX = 70;
+      state.rightX = cssW - 70;
+      state.topY = 170;
+      state.bottomY = cssH - 145;
+
+      drawNumberLine(state.topY, '위', '#2b7fff');
+      drawNumberLine(state.bottomY, '아래', '#ff4f9a');
+
+      const topLX = xForValue(state.top.left);
+      const topRX = xForValue(state.top.right);
+      const botLX = xForValue(state.bottom.left);
+      const botRX = xForValue(state.bottom.right);
+
+      if (state.inputShown) {
+        drawLabelBox(`${formatNum(state.top.left)} ${state.top.relation} ${formatNum(state.top.right)}`,
+          cssW/2, 28, '#eef5ff', '#97c1ff', '#1d4ed8', 1);
+        drawPoint(topLX, state.topY, '#2b7fff');
+        drawPoint(topRX, state.topY, '#2b7fff');
+        drawNumberNearPoint(topLX, state.topY, '#2b7fff', formatNum(state.top.left), 'down', 1);
+        drawNumberNearPoint(topRX, state.topY, '#2b7fff', formatNum(state.top.right), 'down', 1);
+        drawRelationSymbol(topLX, topRX, state.topY, state.top.relation, '#2b7fff', 'above', 1);
+      }
+
+      if (state.animating || state.resultShown || state.progress > 0) {
+        drawDashedGuide(topLX, state.topY, botLX, state.bottomY, 'rgba(43,127,255,0.5)', state.progress);
+        drawDashedGuide(topRX, state.topY, botRX, state.bottomY, 'rgba(43,127,255,0.5)', state.progress);
+        drawAnimatedArrow(topLX, state.topY + 2, botLX, state.bottomY - 2, '#2b7fff', state.progress, 20);
+        drawAnimatedArrow(topRX, state.topY + 2, botRX, state.bottomY - 2, '#ff4f9a', state.progress, -20);
+      }
+
+      const appear = Math.max(0, Math.min(1, (state.progress - 0.72) / 0.28));
+      if (state.resultShown || state.animating) {
+        drawPoint(botLX, state.bottomY, '#ff4f9a');
+        drawPoint(botRX, state.bottomY, '#ff4f9a');
+        drawNumberNearPoint(botLX, state.bottomY, '#ff4f9a', formatNum(state.bottom.left), 'down', appear);
+        drawNumberNearPoint(botRX, state.bottomY, '#ff4f9a', formatNum(state.bottom.right), 'down', appear);
+        drawRelationSymbol(botLX, botRX, state.bottomY, state.bottom.relation, '#ff4f9a', 'below', appear);
+
+        if (state.bottom.left < state.min) drawClampMark(state.bottom.left, state.bottomY, '#ff4f9a', 'left', appear);
+        if (state.bottom.left > state.max) drawClampMark(state.bottom.left, state.bottomY, '#ff4f9a', 'right', appear);
+        if (state.bottom.right < state.min) drawClampMark(state.bottom.right, state.bottomY, '#ff4f9a', 'left', appear);
+        if (state.bottom.right > state.max) drawClampMark(state.bottom.right, state.bottomY, '#ff4f9a', 'right', appear);
+
+        drawLabelBox(`${formatNum(state.bottom.left)} ${state.bottom.relation} ${formatNum(state.bottom.right)}`,
+          cssW/2, cssH - 78, '#fff0f7', '#ffb0d0', '#db2777', appear);
+      }
+
+      ctx.save();
+      ctx.fillStyle = '#475569';
+      ctx.font = '15px sans-serif';
+      ctx.textAlign = 'center';
+      if (state.inputShown) ctx.fillText('입력한 대소관계', cssW/2, 92);
+      if (state.animating || state.resultShown) ctx.fillText('같은 수를 곱하거나 나눈 뒤', cssW/2, state.topY + 98);
+      ctx.restore();
+    }
+
+    function startAnimation() {
+      state.progress = 0;
+      state.animating = true;
+      state.resultShown = true;
+      const duration = 2600; // slower
+      const start = performance.now();
+
+      function tick(now) {
+        const t = Math.min(1, (now - start) / duration);
+        state.progress = easeInOutCubic(t);
+        drawScene();
+        if (t < 1) requestAnimationFrame(tick);
+        else {
+          state.animating = false;
+          state.progress = 1;
+          drawScene();
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
+    function easeInOutCubic(t) {
+      return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
+    }
+
+    function loadExample() {
+      leftValEl.value = 2;
+      rightValEl.value = 4;
+      relationEl.value = '<';
+      opTypeEl.value = 'mul';
+      opValueEl.value = -2;
+      state.inputShown = false;
+      state.resultShown = false;
+      state.animating = false;
+      state.progress = 0;
+      exprTopEl.textContent = '2 < 4';
+      exprBottomEl.textContent = '아직 계산 전입니다.';
+      hintTextEl.textContent = '숫자입력을 누르면 첫 수직선 위에 식이 나타납니다.';
+      drawScene();
+    }
+
+    inputBtn.addEventListener('click', applyInput);
+    calcBtn.addEventListener('click', computeResult);
+    resetBtn.addEventListener('click', loadExample);
+    window.addEventListener('resize', drawScene);
+
+    loadExample();
+  </script>
+</body>
+</html>
