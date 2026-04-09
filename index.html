@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>하계 수학 허브 | Hagye Math</title>
+  <meta name="description" content="2nd_grade 폴더의 웹앱 페이지를 자동으로 연결하는 허브" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-top: #f9f3e9;
+      --bg-bottom: #d9ecff;
+      --surface: rgba(255, 255, 255, 0.72);
+      --surface-strong: rgba(255, 255, 255, 0.86);
+      --ink: #152238;
+      --ink-soft: #3b4d6b;
+      --accent: #ef6f35;
+      --accent-2: #1f8f7a;
+      --ring: rgba(21, 34, 56, 0.12);
+      --shadow: 0 24px 60px rgba(21, 34, 56, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Noto Sans KR", "Space Grotesk", sans-serif;
+      color: var(--ink);
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(239, 111, 53, 0.2), transparent 32%),
+        radial-gradient(circle at 92% 84%, rgba(31, 143, 122, 0.2), transparent 35%),
+        linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+      overflow-x: hidden;
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.25;
+      background-image: radial-gradient(rgba(21, 34, 56, 0.2) 0.5px, transparent 0.5px);
+      background-size: 3px 3px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.7));
+      z-index: 0;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 28px 20px 56px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: var(--surface);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--ring);
+      box-shadow: 0 8px 24px rgba(21, 34, 56, 0.1);
+      animation: riseIn 600ms ease both;
+    }
+
+    .brand {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .tag {
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+    }
+
+    main {
+      margin-top: 30px;
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+    }
+
+    .hero,
+    .card {
+      border-radius: 24px;
+      border: 1px solid var(--ring);
+      background: var(--surface-strong);
+      backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      transform: translateY(18px);
+      opacity: 0;
+      animation: riseIn 700ms ease forwards;
+    }
+
+    .hero {
+      grid-column: span 12;
+      padding: 34px;
+      animation-delay: 120ms;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, rgba(239, 111, 53, 0.33), rgba(31, 143, 122, 0.26));
+      top: -70px;
+      right: -70px;
+      filter: blur(1px);
+    }
+
+    h1 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2rem, 4.2vw, 3.8rem);
+      line-height: 1.06;
+      max-width: 15ch;
+      letter-spacing: -0.03em;
+    }
+
+    .lead {
+      margin-top: 14px;
+      color: var(--ink-soft);
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      max-width: 58ch;
+      line-height: 1.65;
+    }
+
+    .cta-row {
+      margin-top: 24px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 11px 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      border: 1px solid transparent;
+      transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+      will-change: transform;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: linear-gradient(130deg, var(--accent), #ff9a50);
+      color: #fff;
+      box-shadow: 0 10px 20px rgba(239, 111, 53, 0.28);
+    }
+
+    .btn-secondary {
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.74);
+      border-color: var(--ring);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .card {
+      padding: 24px;
+      animation-delay: 220ms;
+    }
+
+    .apps-card {
+      grid-column: span 12;
+    }
+
+    .apps-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .count-chip {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--ring);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      color: var(--ink-soft);
+      background: rgba(255, 255, 255, 0.75);
+    }
+
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .app-item {
+      grid-column: span 4;
+      display: block;
+      text-decoration: none;
+      border: 1px solid var(--ring);
+      border-radius: 16px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.88);
+      color: var(--ink);
+      transition: transform 180ms ease, box-shadow 180ms ease;
+      box-shadow: 0 8px 18px rgba(21, 34, 56, 0.08);
+    }
+
+    .app-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px rgba(21, 34, 56, 0.14);
+    }
+
+    .app-title {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .app-path {
+      color: var(--ink-soft);
+      font-size: 0.9rem;
+      word-break: break-all;
+    }
+
+    .empty-state {
+      border: 1px dashed var(--ring);
+      border-radius: 16px;
+      padding: 18px;
+      color: var(--ink-soft);
+      background: rgba(255, 255, 255, 0.6);
+      line-height: 1.6;
+    }
+
+    .card:nth-of-type(3) {
+      animation-delay: 310ms;
+    }
+
+    .card:nth-of-type(4) {
+      animation-delay: 390ms;
+    }
+
+    .card h2 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .card p {
+      color: var(--ink-soft);
+      line-height: 1.6;
+      font-size: 0.98rem;
+    }
+
+    footer {
+      margin-top: 26px;
+      color: var(--ink-soft);
+      font-size: 0.92rem;
+      text-align: right;
+      animation: riseIn 740ms ease both;
+      animation-delay: 470ms;
+    }
+
+    @media (max-width: 920px) {
+      .app-item {
+        grid-column: span 6;
+      }
+
+      .hero {
+        padding: 28px 22px;
+      }
+
+      .wrap {
+        padding: 18px 14px 40px;
+      }
+
+      nav {
+        padding: 12px 14px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .app-item {
+        grid-column: span 12;
+      }
+    }
+
+    @keyframes riseIn {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="grain"></div>
+  <div class="wrap">
+    <nav>
+      <div class="brand">Hagye Math</div>
+      <div class="tag">GitHub Pages</div>
+    </nav>
+
+    <main>
+      <section class="hero">
+        <h1>수학 웹앱 연결 허브</h1>
+        <p class="lead">
+          이 페이지는 <strong>2nd_grade</strong> 폴더에 있는 단일 웹페이지 파일을 자동으로 모아 연결합니다.
+          지금은 1개 페이지가 있으며, 새 HTML 파일을 추가하면 허브 목록에 바로 나타납니다.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://github.com/dorororong/hagye_math" target="_blank" rel="noreferrer">저장소 보기</a>
+          <a class="btn btn-secondary" href="#apps">앱 목록 보기</a>
+        </div>
+      </section>
+
+      <section class="card apps-card" id="apps">
+        <div class="apps-head">
+          <h2>2학년 페이지 목록</h2>
+          <div class="count-chip" id="appCount">불러오는 중...</div>
+        </div>
+        <div class="apps-grid" id="appList"></div>
+      </section>
+    </main>
+
+    <footer>
+      Last updated: 2026-04-09
+    </footer>
+  </div>
+
+  <script>
+    const owner = 'dorororong';
+    const repo = 'hagye_math';
+    const branch = 'main';
+    const targetFolder = '2nd_grade';
+
+    const appListEl = document.getElementById('appList');
+    const appCountEl = document.getElementById('appCount');
+
+    function titleFromName(fileName) {
+      const base = fileName.replace(/\.(html?|md)$/i, '');
+      return base.replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+    }
+
+    function isWebPage(fileName) {
+      return /\.html?$/i.test(fileName) || !fileName.includes('.');
+    }
+
+    function createAppCard(path, name) {
+      const link = document.createElement('a');
+      link.className = 'app-item';
+      link.href = `./${path}`;
+
+      const title = document.createElement('div');
+      title.className = 'app-title';
+      title.textContent = titleFromName(name);
+
+      const filePath = document.createElement('div');
+      filePath.className = 'app-path';
+      filePath.textContent = path;
+
+      link.appendChild(title);
+      link.appendChild(filePath);
+      return link;
+    }
+
+    function renderEmpty(message) {
+      appListEl.innerHTML = '';
+      const box = document.createElement('div');
+      box.className = 'empty-state';
+      box.textContent = message;
+      appListEl.appendChild(box);
+    }
+
+    async function loadApps() {
+      try {
+        const api = `https://api.github.com/repos/${owner}/${repo}/contents/${targetFolder}?ref=${branch}`;
+        const res = await fetch(api);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const files = await res.json();
+        const pages = files
+          .filter((item) => item.type === 'file' && isWebPage(item.name))
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        if (!pages.length) {
+          appCountEl.textContent = '0개 페이지';
+          renderEmpty('2nd_grade 폴더에 HTML 파일을 추가하면 이곳에 자동으로 표시됩니다.');
+          return;
+        }
+
+        appListEl.innerHTML = '';
+        pages.forEach((page) => {
+          appListEl.appendChild(createAppCard(page.path, page.name));
+        });
+        appCountEl.textContent = `${pages.length}개 페이지`;
+      } catch (err) {
+        appCountEl.textContent = '불러오기 실패';
+        renderEmpty('목록을 불러오지 못했습니다. 잠시 후 새로고침하거나 저장소 설정을 확인해 주세요.');
+      }
+    }
+
+    loadApps();
+  </script>
+</body>
+</html>
